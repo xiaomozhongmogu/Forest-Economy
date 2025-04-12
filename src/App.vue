@@ -1,5 +1,8 @@
 <script setup>
+import TestPersistence from './components/TestPersistence.vue'
+import { useTestStore } from './stores/testStore'
 
+const testStore = useTestStore()
 </script>
 
 <template>
@@ -12,6 +15,12 @@
     <el-button>click me</el-button>
   </div>
   <testCon></testCon>
+  <TestPersistence />
+  <div>
+  <p>{{ testStore.token }}</p>
+  <el-button @click="testStore.setToken('newToken')">appear</el-button>
+  <el-button @click="testStore.removeToken">disappear</el-button>
+</div>
 </template>
 
 <style scoped>
