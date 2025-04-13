@@ -9,7 +9,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     CommunityContent: typeof import('./src/components/communityContent.vue')['default']
-    ConmmunityContent: typeof import('./src/components/conmmunityContent.vue')['default']
+    ConmmunityContent: typeof import('./src/components/communityContent.vue')['default']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElContainer: typeof import('element-plus/es')['ElContainer']
     ElDialog: typeof import('element-plus/es')['ElDialog']

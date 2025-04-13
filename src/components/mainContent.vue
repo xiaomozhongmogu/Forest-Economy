@@ -62,24 +62,18 @@ export default {
 
 <style scoped>
 .main-content {
+  width: 100%;
+  max-width: 1200px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
-  height: 100vh;
-  background-color: #FDFBF7; /* 奶油色背景 */
-  padding: 150px 40px;
-  box-sizing: border-box;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
-  text-align: center;
-  width: 100%;
-  overflow-y: auto;
+  padding: 0 20px;
 }
 
 .search-title {
   margin-bottom: 40px;
   text-align: center;
-  width: 100%;
+  margin-top: 60px; /* 增加上边距 */
 }
 
 .search-title h1 {
@@ -91,9 +85,8 @@ export default {
 .search-container {
   width: 100%;
   max-width: 700px;
-  margin: 0 auto 40px auto; /* 使用auto左右边距实现水平居中 */
-  display: flex;
-  justify-content: center; /* 水平居中内容 */
+  margin: 0 auto;
+  margin-top: 60px; /* 增加上边距 */
 }
 
 .search-input-wrapper {
@@ -164,7 +157,7 @@ export default {
 .suggested-searches {
   width: 100%;
   max-width: 700px;
-  margin: 30px auto 0 auto; /* 使用auto左右边距实现水平居中 */
+  margin: 30px auto;
 }
 
 .suggested-searches h3 {
@@ -198,10 +191,10 @@ export default {
 }
 
 .footer {
-  margin-top: auto;
+  margin-top: 60px;
   width: 100%;
   text-align: center;
-  padding-top: 40px;
+  padding: 20px 0;
 }
 
 .footer-links {

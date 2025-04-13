@@ -136,6 +136,10 @@ export default {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
   transition: width 0.3s ease;
   overflow: hidden;
+  position: fixed; /* 添加固定定位 */
+  left: 0; /* 固定在左侧 */
+  top: 0; /* 固定在顶部 */
+  z-index: 1000; /* 确保在其他内容之上 */
 }
 
 .sidebar.minimized {
