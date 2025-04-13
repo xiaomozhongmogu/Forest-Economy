@@ -216,7 +216,7 @@ export default {
 <style scoped>
 .login-page {
   min-height: 100vh;
-  background-color: #F8F7F2;
+  background-color: #e5f8b9;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -462,7 +462,7 @@ export default {
 .login-button {
   width: 100%;
   padding: 16px;
-  background-color: #556B2F;
+  background-color: #7B904B;
   border: none;
   border-radius: 10px;
   color: white;
@@ -471,19 +471,19 @@ export default {
   cursor: pointer;
   transition: all 0.3s;
   position: relative;
-  box-shadow: 0 4px 12px rgba(85, 107, 47, 0.3);
+  box-shadow: 0 4px 12px rgba(123, 144, 75, 0.3);
   margin-bottom: 30px;
 }
 
 .login-button:hover:not(:disabled) {
-  background-color: #455A20;
+  background-color: #556B2F;
   transform: translateY(-2px);
-  box-shadow: 0 6px 15px rgba(85, 107, 47, 0.4);
+  box-shadow: 0 6px 15px rgba(123, 144, 75, 0.4);
 }
 
 .login-button:active:not(:disabled) {
   transform: translateY(0);
-  box-shadow: 0 4px 8px rgba(85, 107, 47, 0.3);
+  box-shadow: 0 4px 8px rgba(123, 144, 75, 0.3);
 }
 
 .login-button:disabled {

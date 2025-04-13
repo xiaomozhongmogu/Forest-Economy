@@ -69,16 +69,20 @@
 
       <!-- 修改后的登录/注册按钮部分 -->
 <div class="auth-buttons">
-  <router-link to="/register" class="button-link">
+
+  <!-- 为了简介界面，暂时隐藏注册按钮 -->
+  <!-- <router-link to="/register" class="button-link">
     <el-button type="primary" class="auth-button register-button" size="large">
       注册
     </el-button>
-  </router-link>
+  </router-link> -->
+
   <router-link to="/login" class="button-link">
     <el-button type="text" class="auth-button login-button" size="large">
       登录
     </el-button>
   </router-link>
+  
 </div>
 
       <!-- 下载按钮 -->
@@ -362,13 +366,13 @@ export default {
 }
 
 .login-button {
-  background-color: white;
-  color: #556B2F;
-  border: 1px solid #556B2F;
+  background-color: #556B2F;
+  color: white;
+  border: none;
 }
 
 .login-button:hover {
-  background-color: #F4F8F0;
+  background-color: #455A20;
 }
 
 .download-button {
@@ -451,7 +455,12 @@ export default {
 }
 
 .login-button {
-  color: #606266; /* Element Plus 默认文本颜色 */
-  text-align: center;
+  background-color: #556B2F;
+  color: white;
+  border: none;
+}
+
+.login-button:hover {
+  background-color: #455A20;
 }
 </style>

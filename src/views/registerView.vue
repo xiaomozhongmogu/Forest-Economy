@@ -353,7 +353,7 @@ export default {
 <style scoped>
 .register-page {
   min-height: 100vh;
-  background-color: #F8F7F2;
+  background-color: #e5f8b9;
   display: flex;
   justify-content: center;
   align-items: center;
