@@ -37,24 +37,32 @@
         <div class="nav-icon">💰</div>
         <div class="nav-text">我的资产</div>
       </div>
-      <div class="nav-item">
+      <div class="nav-item" @click="toggleResourceMenu">
         <div class="nav-icon">📚</div>
-        <div class="nav-text">资源库</div>
+        <div class="nav-text" >资源库</div>
+        <div class="expand-icon" >
+          {{ isResourceMenuOpen ? '▼' : '▶' }}
+        </div>
       </div>
       <!-- 项目库子菜单 -->
-      <div class="sub-menu">
-        <div class="sub-item">林下食用菌培育技术</div>
-        <div class="sub-item">中国各省林下经济产值</div>
-        <div class="sub-item">林下养殖最佳实践案例</div>
-        <div class="sub-item">林下药材种植指南</div>
-        <div class="sub-item">林下经济政策扶持</div>
+      <div class="sub-menu" v-show="isResourceMenuOpen" :style="{ maxHeight: isResourceMenuOpen ? '200px' : '0' }">
+        <!-- 添加过渡效果 -->
+        <transition name="sub-menu-transition">
+          <div v-if="isResourceMenuOpen">
+            <div class="sub-item">林下食用菌培育技术</div>
+            <div class="sub-item">中国各省林下经济产值</div>
+            <div class="sub-item">林下养殖最佳实践案例</div>
+            <div class="sub-item">林下药材种植指南</div>
+            <div class="sub-item">林下经济政策扶持</div>
+          </div>
+        </transition>
       </div>
       <div class="nav-item">
         <div class="nav-icon">🔍</div>
         <div class="nav-text">数据管理与分析</div>
       </div>
 
-      
+
     </div>
 
     <!-- 底部区域 -->
@@ -87,7 +95,7 @@
       登录
     </el-button>
   </router-link>
-  
+
 </div>
     </div>
   </div>
@@ -99,13 +107,23 @@ export default {
   data() {
     return {
       isMinimized: false,
-      newProject: ''
+      newProject: '',
+      isResourceMenuOpen: true
     }
   },
   methods: {
-    toggleMinimize() {
+    toggleMinimize() {//切换侧边栏的显示状态
       this.isMinimized = !this.isMinimized
       this.$emit('toggle-sidebar', this.isMinimized)
+    },
+    toggleResourceMenu() {//切换资源库的显示状态
+      this.isResourceMenuOpen = !this.isResourceMenuOpen
+      const subMenu = this.$el.querySelector('.sub-menu')
+      if (this.isResourceMenuOpen) {
+        subMenu.classList.add('open')
+      } else {
+        subMenu.classList.remove('open')
+      }
     }
   }
 }
@@ -254,6 +272,7 @@ export default {
   cursor: pointer;
   margin-bottom: 5px;
   color: #2B3F2B; /* 暗绿色文字 */
+  position: relative;
 }
 
 .nav-item:hover {
@@ -272,9 +291,36 @@ export default {
   font-size: 14px;
 }
 
+.expand-icon {
+  position: absolute;
+  right: 10px;
+  font-size: 12px;
+  color: #7D7060;
+  cursor: pointer;
+}
+
+.expand-icon:hover {
+  color: #556B2F;
+}
+
 .sub-menu {
-  margin-left: 30px;
-  margin-top: 5px;
+  max-height: 0; /* 初始状态为0 */
+  overflow: hidden; /* 隐藏溢出内容 */
+  transition: max-height 0.3s ease; /* 添加过渡效果 */
+  .sub-menu-transition-enter-active,
+  .sub-menu-transition-leave-active {
+    transition: all 0.3s ease;
+  }
+  .sub-menu-transition-enter-from,
+  .sub-menu-transition-leave-to {
+    max-height: 0;
+    opacity: 0;
+  }
+  .sub-menu-transition-enter-to,
+  .sub-menu-transition-leave-from {
+    max-height: 200px;
+    opacity: 1;
+  }
 }
 
 .sub-item {
