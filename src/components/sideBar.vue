@@ -26,22 +26,21 @@
     <!-- 导航菜单 -->
     <div class="nav-menu">
       <div class="nav-item">
-        <div class="nav-icon">◉</div>
+        <div class="nav-icon">🏠</div>
         <div class="nav-text">首页</div>
       </div>
       <div class="nav-item">
-        <div class="nav-icon">⊕</div>
-        <div class="nav-text">发现</div>
+        <div class="nav-icon">💬</div>
+        <div class="nav-text">社区</div>
       </div>
       <div class="nav-item">
-        <div class="nav-icon">◇</div>
-        <div class="nav-text">资源</div>
+        <div class="nav-icon">💰</div>
+        <div class="nav-text">我的资产</div>
       </div>
       <div class="nav-item">
-        <div class="nav-icon">◔</div>
-        <div class="nav-text">项目库</div>
+        <div class="nav-icon">📚</div>
+        <div class="nav-text">资源库</div>
       </div>
-
       <!-- 项目库子菜单 -->
       <div class="sub-menu">
         <div class="sub-item">林下食用菌培育技术</div>
@@ -50,20 +49,26 @@
         <div class="sub-item">林下药材种植指南</div>
         <div class="sub-item">林下经济政策扶持</div>
       </div>
+      <div class="nav-item">
+        <div class="nav-icon">🔍</div>
+        <div class="nav-text">数据管理与分析</div>
+      </div>
+
+      
     </div>
 
     <!-- 底部区域 -->
     <div class="bottom-section">
       <!-- 升级区域 -->
       <div class="upgrade-section">
-        <div class="upgrade-title">升级到专业版</div>
+        <div class="upgrade-title">不知道如何使用？</div>
         <div class="upgrade-desc">
-          获取更多林下经济研究资源，
+          点击用户手册
           <br />
-          使用先进分析工具和生态系统模型。
+          开始使用先进分析工具和模型。
         </div>
         <el-button type="primary" class="upgrade-button">
-          <span>↗</span> 升级
+          <span>↗</span> 用户手册
         </el-button>
       </div>
 
@@ -84,12 +89,6 @@
   </router-link>
   
 </div>
-
-      <!-- 下载按钮 -->
-      <el-button type="text" class="download-button">
-        下载报告
-        <span class="download-icon">↓</span>
-      </el-button>
     </div>
   </div>
 </template>
