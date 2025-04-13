@@ -1,27 +1,27 @@
 <template>
   <div class="sidebar" :class="{ 'minimized': isMinimized }">
     <!-- Logo区域 -->
-<div class="logo-container">
-  <div class="logo" v-if="!isMinimized">
-    <span class="logo-icon">🌿</span>
-    <span class="logo-text">林下经济</span>
-  </div>
-  <el-button v-else type="text" class="minimize-button centered-button" @click="toggleMinimize">
-    ➔
-  </el-button>
-  <el-button v-if="!isMinimized" type="text" class="minimize-button" @click="toggleMinimize">
-    ←
-  </el-button>
-</div>
+    <div class="logo-container">
+      <div class="logo" v-if="!isMinimized">
+        <span class="logo-icon">🌿</span>
+        <span class="logo-text">林下经济</span>
+      </div>
+      <el-button v-else type="text" class="minimize-button centered-button" @click="toggleMinimize">
+        ➔
+      </el-button>
+      <el-button v-if="!isMinimized" type="text" class="minimize-button" @click="toggleMinimize">
+        ←
+      </el-button>
+    </div>
 
     <!-- 新建项目 -->
-<div class="new-project-container">
-  <el-button class="new-project-button">
-    <span v-if="!isMinimized" style="margin-left: 10px;">新建项目</span>
-    <span v-else class="add-icon">+</span>
-    <span v-if="!isMinimized" class="shortcut-hint"></span>
-  </el-button>
-</div>
+    <div class="new-project-container">
+      <el-button class="new-project-button">
+        <span v-if="!isMinimized" style="margin-left: 10px;">新建项目</span>
+        <span v-else class="add-icon">+</span>
+        <span v-if="!isMinimized" class="shortcut-hint"></span>
+      </el-button>
+    </div>
 
     <!-- 导航菜单 -->
     <div class="nav-menu">
@@ -67,14 +67,19 @@
         </el-button>
       </div>
 
-      <!-- 用户资料 -->
-      <div class="user-profile">
-        <div class="avatar">
-          <img src="https://via.placeholder.com/32" alt="User avatar" />
-        </div>
-        <div class="username">林业专家</div>
-        <div class="settings-icon">⚙</div>
-      </div>
+      <!-- 修改后的登录/注册按钮部分 -->
+<div class="auth-buttons">
+  <router-link to="/register" class="button-link">
+    <el-button type="primary" class="auth-button register-button" size="large">
+      注册
+    </el-button>
+  </router-link>
+  <router-link to="/login" class="button-link">
+    <el-button type="text" class="auth-button login-button" size="large">
+      登录
+    </el-button>
+  </router-link>
+</div>
 
       <!-- 下载按钮 -->
       <el-button type="text" class="download-button">
@@ -131,9 +136,10 @@ export default {
 
 .sidebar.minimized .search-box,
 .sidebar.minimized .nav-item,
-.sidebar.minimized .user-profile {
+.sidebar.minimized .auth-buttons {
   padding: 8px 5px;
 }
+
 .sidebar.minimized .new-project-container {
   display: block;
   padding: 0;
@@ -326,37 +332,43 @@ export default {
   margin-right: 5px;
 }
 
-.user-profile {
+/* 新增登录/注册按钮样式 */
+.auth-buttons {
   display: flex;
-  align-items: center;
-  padding: 10px;
-  margin-bottom: 10px;
+  flex-direction: column; /* 改为纵向排列 */
+  gap: 8px; /* 按钮之间的间距 */
+  padding: 0;
+  margin-bottom: 15px;
 }
 
-.avatar {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  overflow: hidden;
-  margin-right: 10px;
-  border: 2px solid #98C9A3; /* 薄荷绿边框 */
-}
-
-.avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.username {
-  flex: 1;
+.register-button, .login-button {
+  width: 48%;
+  padding: 8px 0;
+  border-radius: 6px;
   font-size: 14px;
-  color: #3C2A1A; /* 深木色文字 */
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
 }
 
-.settings-icon {
-  color: #556B2F; /* 橄榄绿图标 */
-  cursor: pointer;
+.register-button {
+  background-color: #556B2F;
+  color: white;
+  border: none;
+}
+
+.register-button:hover {
+  background-color: #455A20;
+}
+
+.login-button {
+  background-color: white;
+  color: #556B2F;
+  border: 1px solid #556B2F;
+}
+
+.login-button:hover {
+  background-color: #F4F8F0;
 }
 
 .download-button {
@@ -364,7 +376,6 @@ export default {
   align-items: center;
   justify-content: space-between;
   padding: 10px;
-  border-top: 1px solid #E8E0D0;
   font-size: 14px;
   color: #5A4A3A;
 }
@@ -419,5 +430,28 @@ export default {
   border-radius: 3px;
   padding: 1px 4px;
   margin-left: 3px;
+}
+
+.button-link {
+  width: 100%;
+  display: block;
+  text-decoration: none;
+}
+
+.auth-button {
+  width: 100%;
+  border-radius: 8px;
+  font-size: 14px;
+  height: 40px; /* 设置合适的高度 */
+}
+
+.register-button {
+  background-color: #556B2F; /* Element Plus 默认主色，或使用 #556B2F 保持原有风格 */
+  border: none;
+}
+
+.login-button {
+  color: #606266; /* Element Plus 默认文本颜色 */
+  text-align: center;
 }
 </style>
