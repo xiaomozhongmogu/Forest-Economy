@@ -25,11 +25,11 @@
 
     <!-- 导航菜单 -->
     <div class="nav-menu">
-      <div class="nav-item">
+      <div class="nav-item" @click="showMain">
         <div class="nav-icon">🏠</div>
         <div class="nav-text">首页</div>
       </div>
-      <div class="nav-item">
+      <div class="nav-item" @click="showCommunity">
         <div class="nav-icon">💬</div>
         <div class="nav-text">社区</div>
       </div>
@@ -61,8 +61,6 @@
         <div class="nav-icon">🔍</div>
         <div class="nav-text">数据管理与分析</div>
       </div>
-
-
     </div>
 
     <!-- 底部区域 -->
@@ -81,22 +79,13 @@
       </div>
 
       <!-- 修改后的登录/注册按钮部分 -->
-<div class="auth-buttons">
-
-  <!-- 为了简介界面，暂时隐藏注册按钮 -->
-  <!-- <router-link to="/register" class="button-link">
-    <el-button type="primary" class="auth-button register-button" size="large">
-      注册
-    </el-button>
-  </router-link> -->
-
-  <router-link to="/login" class="button-link">
-    <el-button type="text" class="auth-button login-button" size="large">
-      登录
-    </el-button>
-  </router-link>
-
-</div>
+      <div class="auth-buttons">
+        <router-link to="/login" class="button-link">
+          <el-button type="text" class="auth-button login-button" size="large">
+            登录
+          </el-button>
+        </router-link>
+      </div>
     </div>
   </div>
 </template>
@@ -112,11 +101,11 @@ export default {
     }
   },
   methods: {
-    toggleMinimize() {//切换侧边栏的显示状态
+    toggleMinimize() {
       this.isMinimized = !this.isMinimized
       this.$emit('toggle-sidebar', this.isMinimized)
     },
-    toggleResourceMenu() {//切换资源库的显示状态
+    toggleResourceMenu() {
       this.isResourceMenuOpen = !this.isResourceMenuOpen
       const subMenu = this.$el.querySelector('.sub-menu')
       if (this.isResourceMenuOpen) {
@@ -124,6 +113,12 @@ export default {
       } else {
         subMenu.classList.remove('open')
       }
+    },
+    showCommunity() {
+      this.$emit('show-community')
+    },
+    showMain() {
+      this.$emit('show-main')
     }
   }
 }

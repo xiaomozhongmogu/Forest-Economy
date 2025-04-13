@@ -21,7 +21,8 @@ const router = createRouter({
       path: '/login',//登录页面
       name : 'Login',
       component: LoginView
-    }
+    },
+    
   ],
 })
 
