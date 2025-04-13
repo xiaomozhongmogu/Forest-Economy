@@ -1,5 +1,6 @@
 <template>
-  <el-container class="app-container" :class="{ 'sidebar-minimized': isSidebarMinimized }">
+  <router-view v-if="$route.path === '/login'" />
+  <el-container v-else class="app-container" :class="{ 'sidebar-minimized': isSidebarMinimized }">
     <SideBar @toggle-sidebar="handleSidebarToggle" />
     <el-main>
       <MainContent />
