@@ -4,6 +4,7 @@ import RegisterView from '../views/registerView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
+
   routes: [
     {
       path: '/',
@@ -15,6 +16,11 @@ const router = createRouter({
       name: 'register',
       component: RegisterView
     },
+    {
+      path: '/login',//登录页面
+      name : 'Login',
+      component: () => import('../views/loginPage.vue')//登录页面组件
+    }
   ],
 })
 
