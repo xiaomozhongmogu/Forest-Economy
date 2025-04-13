@@ -20,7 +20,7 @@ const router = createRouter({
     {
       path: '/login',//登录页面
       name : 'Login',
-      component: LoginView//登录页面组件
+      component: () => import('../views/loginView.vue')//登录页面组件
     }
   ],
 })
