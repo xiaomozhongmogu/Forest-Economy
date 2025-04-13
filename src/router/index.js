@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/homeView.vue'
 import RegisterView from '../views/registerView.vue'
+import LoginView from '../views/loginView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -19,7 +20,7 @@ const router = createRouter({
     {
       path: '/login',//登录页面
       name : 'Login',
-      component: () => import('../views/loginPage.vue')//登录页面组件
+      component: LoginView//登录页面组件
     }
   ],
 })
