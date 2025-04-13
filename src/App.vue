@@ -1,28 +1,53 @@
-<script setup>
-import TestPersistence from './components/TestPersistence.vue'
-import { useTestStore } from './stores/testStore'
-
-const testStore = useTestStore()
-</script>
-
 <template>
-  <div id="app">
-    <h1>欢迎使用Vue.js应用</h1>
-    <p>这是一个简单的Vue.js应用，测试div显示问题。</p>
-    <div style="border: 2px solid red; padding: 10px;">
-      这是一个测试div，确保它能够正确显示。
-    </div>
-    <el-button>click me</el-button>
-  </div>
-  <testCon></testCon>
-  <TestPersistence />
-  <div>
-  <p>{{ testStore.token }}</p>
-  <el-button @click="testStore.setToken('newToken')">appear</el-button>
-  <el-button @click="testStore.removeToken">disappear</el-button>
-</div>
+  <el-container class="app-container" :class="{ 'sidebar-minimized': isSidebarMinimized }">
+    <SideBar @toggle-sidebar="handleSidebarToggle" />
+    <el-main>
+      <MainContent />
+    </el-main>
+  </el-container>
 </template>
 
-<style scoped>
+<script>
+import SideBar from './components/sideBar.vue'
+import MainContent from './components/mainContent.vue'
 
+export default {
+  components: {
+    SideBar,
+    MainContent
+  },
+  data() {
+    return {
+      isSidebarMinimized: false
+    }
+  },
+  methods: {
+    handleSidebarToggle(isMinimized) {
+      this.isSidebarMinimized = isMinimized
+    }
+  }
+}
+</script>
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
+  background-color: #FDFBF7;
+}
+
+.app-container {
+  height: 100vh;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.app-container.sidebar-minimized el-main {
+  width: calc(100% - 60px); /* 当侧边栏最小化时，主内容区宽度调整 */
+}
 </style>
