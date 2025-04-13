@@ -1,5 +1,5 @@
 <template>
-  <div class="main-content">
+  <div class="search-content">
     <!-- 页面标题 -->
     <div class="search-title">
       <h1>您想了解哪些林下经济知识？</h1>
@@ -61,13 +61,21 @@ export default {
 </script>
 
 <style scoped>
-.main-content {
-  width: 100%;
-  max-width: 1200px;
+.search-content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 0 20px;
+  justify-content: flex-start;
+  height: 100vh;
+  background-color: #FDFBF7; /* 奶油色背景 */
+  padding: 150px 40px;
+  /* box-sizing: border-box; */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
+  text-align: center;
+  /* width: 100%; */
+  overflow-y: auto;
+  /* padding-left: 0; */
+  margin-left: 0;
 }
 
 .search-title {

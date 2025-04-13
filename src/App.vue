@@ -22,12 +22,6 @@ body {
   overflow: hidden;
 }
 
-.app-container {
-  height: 100vh;
-  display: flex;
-  position: relative;
-}
-
 /* 重置Element Plus的默认样式 */
 :deep(.el-main) {
   padding: 0 !important;

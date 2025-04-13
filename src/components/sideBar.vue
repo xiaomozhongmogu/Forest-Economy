@@ -33,9 +33,9 @@
         <div class="nav-icon">💬</div>
         <div class="nav-text">社区</div>
       </div>
-      <div class="nav-item">
-        <div class="nav-icon">💰</div>
-        <div class="nav-text">我的资产</div>
+      <div class="nav-item" @click="showDashboard">
+        <div class="nav-icon">📊</div>
+        <div class="nav-text">数据看板</div>
       </div>
       <div class="nav-item" @click="toggleResourceMenu">
         <div class="nav-icon">📚</div>
@@ -119,6 +119,9 @@ export default {
     },
     showMain() {
       this.$emit('show-main')
+    },
+    showDashboard() {
+      this.$emit('show-dashboard')
     }
   }
 }
@@ -152,6 +155,10 @@ export default {
 .sidebar.minimized .sub-menu,
 .sidebar.minimized .bottom-section {
   display: none;
+}
+
+.content-wrapper.minimized {
+  padding-left: 0px; /* 调整主内容区的左边距 */
 }
 
 .sidebar.minimized .search-box,

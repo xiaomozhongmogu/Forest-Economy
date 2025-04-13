@@ -22,7 +22,7 @@ const router = createRouter({
       name : 'Login',
       component: LoginView
     },
-    
+
   ],
 })
 
