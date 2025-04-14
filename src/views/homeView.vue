@@ -6,6 +6,7 @@
       @show-main="handleShowMain"
       @show-dashboard="handleShowDashboard"
     />
+    <!-- 主内容区域 -->
     <el-main class="main-content">
       <div class="content-wrapper">
         <MainContent v-if="!showCommunityContent && !showDashboard" />
@@ -59,40 +60,51 @@ export default {
 </script>
 
 <style scoped>
+/* 全局样式 */
 .app-container {
+  /* 设置高度为100% */
   height: 100vh;
+  /* 设置宽度为100% */
+  width: 100vw;
+  /* 设置为弹性布局 */
   display: flex;
+  /* 设置为相对定位 */
   position: relative;
 }
 
+/* 侧边栏样式 */
 .app-container {
+  /* 设置高度为100% */
   height: 100vh;
+  /* 设置为弹性布局 */
   display: flex;
+  /* 设置为相对定位 */
   position: relative;
 }
 
+/* 主内容区域样式 */
 .main-content {
   flex: 1;
-  margin-left: 230px;
+  width: 100%;
   height: 100%;
   position: relative;
   transition: margin-left 0.3s ease;
+  margin-left: 230px; /* 添加左边距，与侧边栏宽度一致 */
 }
 
+/* 内容区域样式 */
 .content-wrapper {
-  max-width: 1200px; /* 内容区域最大宽度 */
   width: 100%;
   height: 100%;
-  margin: 0 auto; /* 这是关键：在可用空间内居中 */
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
-  align-items: center;
   padding-top: 60px;
   overflow-y: auto;
 }
 
 .sidebar-minimized .main-content {
-  margin-left: 60px;
+  margin-left: 60px; /* 侧边栏收起时的左边距 */
 }
 
 /* 重置Element Plus的默认样式 */

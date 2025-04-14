@@ -61,21 +61,17 @@ export default {
 </script>
 
 <style scoped>
+/* 搜索内容区域样式 */
 .search-content {
   display: flex;
   flex-direction: column;
-  align-items: center;
   justify-content: flex-start;
   height: 100vh;
-  background-color: #FDFBF7; /* 奶油色背景 */
-  padding: 150px 40px;
-  /* box-sizing: border-box; */
+  background-color: #FDFBF7;
+  padding: 60px 20px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
-  text-align: center;
-  /* width: 100%; */
   overflow-y: auto;
-  /* padding-left: 0; */
-  margin-left: 0;
+  width: 100%;
 }
 
 .search-title {
@@ -90,13 +86,15 @@ export default {
   color: #3C2A1A; /* 深木色文字 */
 }
 
+/* 搜索容器样式 */
 .search-container {
+  /* 居中 */
   width: 100%;
-  max-width: 700px;
   margin: 0 auto;
   margin-top: 60px; /* 增加上边距 */
 }
 
+/* 搜索输入框样式 */
 .search-input-wrapper {
   display: flex;
   position: relative;
@@ -108,6 +106,7 @@ export default {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
+/* 搜索输入框样式 */
 .search-input {
   flex: 1;
   border: none;
@@ -117,16 +116,19 @@ export default {
   background: transparent;
 }
 
+/* 搜索输入框占位符样式 */
 .search-input::placeholder {
   color: #A89E8D;
 }
 
+/* 搜索操作图标区样式 */
 .search-actions {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
+/* 搜索操作图标区样式 */
 .action-button {
   background: none;
   border: none;
@@ -162,6 +164,7 @@ export default {
   background-color: #475A27;
 }
 
+/* 推荐搜索或最近搜索样式 */
 .suggested-searches {
   width: 100%;
   max-width: 700px;
