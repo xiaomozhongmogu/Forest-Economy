@@ -1,7 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/homeView.vue'
-import RegisterView from '../views/registerView.vue'
-import LoginView from '../views/loginView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -9,20 +6,37 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: HomeView
+      name: 'layout',
+      component: () => import('@/views/layout/LayoutContainer.vue'),
+      redirect: '/home',
+      children: [
+        {
+          path: '/home',
+          name: 'home',
+          component: () => import('@/views/HomeView.vue')
+        },
+        {
+          path: '/community',
+          name: 'community',
+          component: () => import('@/views/CommunityView.vue')
+        },
+        {
+          path: '/data_dashboard',
+          name: 'data_dashboard',
+          component: () => import('@/views/DataView.vue')
+        }
+      ]
+    },
+    {
+      path: '/login',
+      name: 'login',
+      component: () => import('@/views/LoginView.vue')
     },
     {
       path: '/register',
       name: 'register',
-      component: RegisterView
-    },
-    {
-      path: '/login',//登录页面
-      name : 'Login',
-      component: LoginView
-    },
-
+      component: () => import('@/views/RegisterView.vue')
+    }
   ],
 })
 

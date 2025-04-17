@@ -18,19 +18,21 @@ export default {
 body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
   background-color: #FDFBF7;
-  height: 100vh;
-  overflow: hidden;
+  min-height: 100vh;
+  overflow-y: auto;
+  overflow-x: auto;
 }
 
 /* 重置Element Plus的默认样式 */
 :deep(.el-main) {
   padding: 0 !important;
-  overflow: hidden !important;
-  height: 100% !important;
+  overflow: visible !important;
+  min-height: 100% !important;
 }
 
 :deep(.el-container) {
   height: 100% !important;
+  width: 100% !important;
 }
 
 .app-container.sidebar-minimized el-main {
