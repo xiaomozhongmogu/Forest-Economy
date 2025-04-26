@@ -1,16 +1,15 @@
 <template>
   <div class="sidebar" :class="{ 'minimized': isMinimized }">
-    <!-- Logo区域 -->
     <div class="logo-container">
       <div class="logo" v-if="!isMinimized">
         <span class="logo-icon">🌿</span>
         <span class="logo-text">林下经济</span>
       </div>
-      <el-button v-else type="text" class="minimize-button centered-button" @click="toggleMinimize">
-        ➔
-      </el-button>
       <el-button v-if="!isMinimized" type="text" class="minimize-button" @click="toggleMinimize">
         ←
+      </el-button>
+      <el-button v-else type="text" class="minimize-button centered-button" @click="toggleMinimize">
+        ➔
       </el-button>
     </div>
 
@@ -90,41 +89,42 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'ForestEconomySidebar',
-  data() {
-    return {
-      isMinimized: false,
-      newProject: '',
-      isResourceMenuOpen: true
-    }
-  },
-  methods: {
-    toggleMinimize() {
-      this.isMinimized = !this.isMinimized
-      this.$emit('toggle-sidebar', this.isMinimized)
-    },
-    toggleResourceMenu() {
-      this.isResourceMenuOpen = !this.isResourceMenuOpen
-      const subMenu = this.$el.querySelector('.sub-menu')
-      if (this.isResourceMenuOpen) {
-        subMenu.classList.add('open')
-      } else {
-        subMenu.classList.remove('open')
-      }
-    },
-    showCommunity() {
-      this.$emit('show-community')
-    },
-    showMain() {
-      this.$emit('show-main')
-    },
-    showDashboard() {
-      this.$emit('show-dashboard')
-    }
+<script setup>
+import { ref } from 'vue'
+
+const isMinimized = ref(false)
+const isResourceMenuOpen = ref(true)
+//const newProject = ref(true)
+
+const emit = defineEmits(['toggle-sidebar', 'show-community', 'show-main', 'show-dashboard'])
+
+const toggleMinimize = () => {
+  isMinimized.value =!isMinimized.value
+  emit('toggle-sidebar', isMinimized.value)
+}
+
+const toggleResourceMenu = () => {
+  isResourceMenuOpen.value = !isResourceMenuOpen.value
+  const subMenu = document.querySelector('.sub-menu')
+  if (isResourceMenuOpen.value) {
+    subMenu.classList.add('open')
+  } else {
+    subMenu.classList.remove('open')
   }
 }
+
+const showCommunity = () => {
+  emit('show-community')
+}
+
+const showMain = () => {
+  emit('show-main')
+}
+
+const showDashboard = () => {
+  emit('show-dashboard')
+}
+
 </script>
 
 <style scoped>

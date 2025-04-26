@@ -110,107 +110,119 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'LoginView',
-  data() {
-    return {
-      formData: {
-        phone: '',
-        password: '',
-        remember: false
-      },
-      errors: {
-        phone: '',
-        password: ''
-      },
-      isSubmitting: false,
-      showPassword: false
-    }
-  },
-  methods: {
-    togglePassword() {
-      this.showPassword = !this.showPassword;
-    },
-    validateForm() {
-      let isValid = true;
-      // 重置错误消息
-      for (let key in this.errors) {
-        this.errors[key] = '';
-      }
+<script setup>
+import { ref, reactive } from 'vue'
+import { useRouter } from 'vue-router'
+import { ElMessage } from 'element-plus'
 
-      // 手机号验证
-      const phoneRegex = /^1[3-9]\d{9}$/;
-      if (!this.formData.phone) {
-        this.errors.phone = '请输入手机号码';
-        isValid = false;
-      } else if (!phoneRegex.test(this.formData.phone)) {
-        this.errors.phone = '请输入有效的手机号码';
-        isValid = false;
-      }
+// 响应式状态
+const formData = reactive({
+  phone: '',
+  password: '',
+  remember: false
+})
 
-      // 密码验证
-      if (!this.formData.password) {
-        this.errors.password = '请输入密码';
-        isValid = false;
-      }
+const errors = reactive({
+  phone: '',
+  password: ''
+})
 
-      return isValid;
-    },
-    handleLogin() {
-      if (!this.validateForm()) return;
+const isSubmitting = ref(false)
+const showPassword = ref(false)
 
-      this.isSubmitting = true;
+// 路由实例
+const router = useRouter()
 
-      // 这里可以添加登录API调用
-      console.log('提交登录表单:', this.formData);
+// 切换密码可见性
+const togglePassword = () => {
+  showPassword.value = !showPassword.value
+}
 
-      // 模拟API调用过程
-      setTimeout(() => {
-        this.isSubmitting = false;
+// 表单验证
+const validateForm = () => {
+  let isValid = true
 
-        // 模拟成功登录
-        this.$message({
-          type: 'success',
-          message: '登录成功！'
-        });
+  // 重置错误消息
+  errors.phone = ''
+  errors.password = ''
 
-        // 登录成功后跳转到首页或其他页面
-        setTimeout(() => {
-          this.$router.push('/dashboard');
-        }, 1000);
-      }, 1500);
-    },
-    forgotPassword() {
-      this.$router.push('/forgot-password');
-    },
-    loginWithMethod(method) {
-      console.log(`使用${method}登录`);
+  // 手机号验证
+  const phoneRegex = /^1[3-9]\d{9}$/
+  if (!formData.phone) {
+    errors.phone = '请输入手机号码'
+    isValid = false
+  } else if (!phoneRegex.test(formData.phone)) {
+    errors.phone = '请输入有效的手机号码'
+    isValid = false
+  }
 
-      // 根据不同的登录方式执行不同的操作
-      switch(method) {
-        case 'wechat':
-          this.$message({
-            type: 'info',
-            message: '正在跳转到微信登录...'
-          });
-          break;
-        case 'alipay':
-          this.$message({
-            type: 'info',
-            message: '正在跳转到支付宝登录...'
-          });
-          break;
-        case 'sms':
-          this.$router.push('/sms-login');
-          break;
-      }
-    },
-    goToRegister() {
-      this.$router.push('/register');
-    }
+  // 密码验证
+  if (!formData.password) {
+    errors.password = '请输入密码'
+    isValid = false
+  }
+
+  return isValid
+}
+
+// 处理登录
+const handleLogin = () => {
+  if (!validateForm()) return
+
+  isSubmitting.value = true
+
+  // 模拟API调用
+  setTimeout(() => {
+    isSubmitting.value = false
+
+    // 使用 Element Plus 的消息提示
+    ElMessage({
+      type: 'success',
+      message: '登录成功！'
+    })
+
+    // 登录成功后跳转
+    setTimeout(() => {
+      router.push('/dashboard')
+    }, 1000)
+  }, 1500)
+}
+
+// 忘记密码
+const forgotPassword = () => {
+  router.push('/forgot-password')
+}
+
+// 其他登录方式
+const loginWithMethod = (method) => {
+  console.log(`使用${method}登录`)
+
+  switch(method) {
+    case 'wechat':
+      ElMessage({
+        type: 'info',
+        message: '正在跳转到微信登录...'
+      })
+      break
+    case 'alipay':
+      ElMessage({
+        type: 'info',
+        message: '正在跳转到支付宝登录...'
+      })
+      break
+    case 'sms':
+      router.push('/sms-login')
+      break
   }
 }
+
+// 跳转注册
+const goToRegister = () => {
+  router.push('/register')
+}
+
+
+
 </script>
 
 <style scoped>

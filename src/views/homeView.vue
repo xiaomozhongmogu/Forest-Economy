@@ -6,7 +6,6 @@
       @show-main="handleShowMain"
       @show-dashboard="handleShowDashboard"
     />
-    <!-- 主内容区域 -->
     <el-main class="main-content">
       <div class="content-wrapper">
         <MainContent v-if="!showCommunityContent && !showDashboard" />
@@ -16,48 +15,39 @@
     </el-main>
   </el-container>
 </template>
-<script>
+
+
+<script setup>
+import { ref } from 'vue'
 import SideBar from '../components/sideBar.vue'
 import MainContent from '../components/mainContent.vue'
 import CommunityContent from '../components/communityContent.vue'
 import DataDashboard from '../components/dataDashboard.vue'
 
-export default {
-  components: {
-    SideBar,
-    MainContent,
-    CommunityContent,
-    DataDashboard
-  },
-  data() {
-    return {
-      isSidebarMinimized: false,
-      showCommunityContent: false,
-      showDashboard: false
-    }
-  },
+const isSidebarMinimized = ref(false)
+const showCommunityContent = ref(false)
+const showDashboard = ref(false)
 
-  methods: {
-  // 保留现有方法
-  handleSidebarToggle(isMinimized) {
-    this.isSidebarMinimized = isMinimized;
-  },
-  handleShowCommunity() {
-    this.showCommunityContent = true;
-    this.showDashboard = false;
-  },
-  handleShowMain() {
-    this.showCommunityContent = false;
-    this.showDashboard = false;
-  },
-  // 添加新方法
-  handleShowDashboard() {
-    this.showCommunityContent = false;
-    this.showDashboard = true;
-  }
+const handleSidebarToggle = (isMinimized) => {
+  isSidebarMinimized.value = isMinimized
 }
+
+const handleShowCommunity = () => {
+  showCommunityContent.value = true
+  showDashboard.value = false
 }
+
+const handleShowMain = () => {
+  showCommunityContent.value = false
+  showDashboard.value = false
+}
+const handleShowDashboard = () => {
+  showCommunityContent.value = false
+  showDashboard.value = true
+}
+
 </script>
+
 
 <style scoped>
 /* 全局样式 */
