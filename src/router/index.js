@@ -13,7 +13,9 @@ const router = createRouter({
         {
           path: '/home',
           name: 'home',
-          component: () => import('@/views/HomeView.vue')
+          component: () => import('@/views/homeView.vue'),
+          // 启用 props 传递查询参数作为组件属性
+          props: (route) => ({ new: route.query.new, historyId: route.query.historyId })
         },
         {
           path: '/community',
