@@ -2,35 +2,32 @@
   <el-container class="layout-container" :class="{ 'minimized': isMinimized }">
     <!-- 侧边栏 -->
     <el-aside :width="isMinimized ? '64px' : '230px'" class="aside-container">
-      <el-menu
-        :default-active="activeMenu"
-        class="sidebar"
-        :class="{ 'minimized': isMinimized }"
-        :collapse="isMinimized"
-        :collapse-transition="true"
-        background-color="#FDFBF7"
-        text-color="#2B3F2B"
-        active-text-color="#556B2F"
-        router
-      >
+      <el-menu :default-active="activeMenu" class="sidebar" :class="{ 'minimized': isMinimized }"
+        :collapse="isMinimized" :collapse-transition="true" background-color="#FDFBF7" text-color="#2B3F2B"
+        active-text-color="#556B2F" router>
         <!-- Logo区域 -->
         <div class="logo-container">
           <div class="logo" v-if="!isMinimized">
-            <el-icon class="logo-icon"><Leaf /></el-icon>
             <span class="logo-text">🌿林下经济</span>
           </div>
           <el-button v-else type="text" circle class="minimize-button centered-button" @click="toggleMinimize">
-            <el-icon><ArrowRight /></el-icon>
+            <el-icon>
+              <ArrowRight />
+            </el-icon>
           </el-button>
           <el-button v-if="!isMinimized" type="text" circle class="minimize-button" @click="toggleMinimize">
-            <el-icon><ArrowLeft /></el-icon>
+            <el-icon>
+              <ArrowLeft />
+            </el-icon>
           </el-button>
         </div>
 
         <!-- 新建项目 -->
         <div class="new-project-container">
-          <el-button class="new-project-button" type="primary" plain @click="$router.push('/new-project')">
-            <el-icon><Plus /></el-icon>
+          <el-button class="new-project-button" type="primary" plain @click="createNewProject">
+            <el-icon>
+              <Plus />
+            </el-icon>
             <span v-if="!isMinimized">新建项目</span>
             <span v-if="!isMinimized" class="shortcut-hint"></span>
           </el-button>
@@ -38,23 +35,31 @@
 
         <!-- 导航菜单 -->
         <el-menu-item index="/home">
-          <el-icon><House /></el-icon>
+          <el-icon>
+            <House />
+          </el-icon>
           <template #title>首页</template>
         </el-menu-item>
 
         <el-menu-item index="/community">
-          <el-icon><ChatDotRound /></el-icon>
+          <el-icon>
+            <ChatDotRound />
+          </el-icon>
           <template #title>社区</template>
         </el-menu-item>
 
         <el-menu-item index="/data_dashboard">
-          <el-icon><DataAnalysis /></el-icon>
+          <el-icon>
+            <DataAnalysis />
+          </el-icon>
           <template #title>数据看板</template>
         </el-menu-item>
 
         <el-sub-menu index="4">
           <template #title>
-            <el-icon><Collection /></el-icon>
+            <el-icon>
+              <Collection />
+            </el-icon>
             <span>资源库</span>
           </template>
           <el-menu-item-group>
@@ -67,9 +72,29 @@
         </el-sub-menu>
 
         <el-menu-item index="/data-management">
-          <el-icon><Search /></el-icon>
+          <el-icon>
+            <Search />
+          </el-icon>
           <template #title>数据管理与分析</template>
         </el-menu-item>
+
+        <!-- 历史记录区域 -->
+        <div class="history-section" v-if="!isMinimized && historyStore.chatHistory.length > 0">
+          <div class="history-title">历史记录</div>
+          <div class="history-list">
+            <div v-for="(history, index) in historyStore.chatHistory" :key="index" class="history-item">
+              <div class="history-item-content" @click="loadHistory(history)">
+                <el-icon>
+                  <Clock />
+                </el-icon>
+                <span class="history-item-title">{{ history.title }}</span>
+              </div>
+              <el-icon class="delete-icon" @click.stop="confirmDelete(history)">
+                <Close />
+              </el-icon>
+            </div>
+          </div>
+        </div>
 
         <!-- 底部区域 -->
         <div class="bottom-section" v-if="!isMinimized">
@@ -84,7 +109,9 @@
               开始使用先进分析工具和模型。
             </div>
             <el-button type="success" class="upgrade-button" @click="$router.push('/user-manual')">
-              <el-icon><TopRight /></el-icon> 用户手册
+              <el-icon>
+                <TopRight />
+              </el-icon> 用户手册
             </el-button>
           </el-card>
 
@@ -109,7 +136,9 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { useHistoryStore } from '@/stores/historyStore'
+import { ElMessageBox, ElMessage } from 'element-plus'
 import {
   House,
   ChatDotRound,
@@ -119,14 +148,20 @@ import {
   ArrowLeft,
   ArrowRight,
   Plus,
-  TopRight
+  TopRight,
+  Clock,
+  Close
 } from '@element-plus/icons-vue'
 
 // 侧边栏状态
 const isMinimized = ref(false)
 
-// 获取当前路由
+// 获取当前路由和路由器
 const route = useRoute()
+const router = useRouter()
+
+// 获取历史记录存储
+const historyStore = useHistoryStore()
 
 // 根据当前路由路径动态设置激活的菜单项
 const activeMenu = computed(() => {
@@ -144,12 +179,51 @@ const toggleMinimize = () => {
   localStorage.setItem('sidebarMinimized', isMinimized.value)
 }
 
+// 创建新项目
+const createNewProject = () => {
+  // 刷新路由到新的homeView
+  router.push({ path: '/home', query: { new: Date.now() } })
+}
+
+// 加载历史记录
+const loadHistory = (history) => {
+  // 跳转到主页并加载特定历史
+  router.push({ path: '/home', query: { historyId: history.id } })
+}
+
+// 确认删除历史记录
+const confirmDelete = (history) => {
+  ElMessageBox.confirm(
+    '确定要删除此历史记录吗？',
+    '删除确认',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    }
+  )
+    .then(() => {
+      // 删除历史记录
+      historyStore.removeHistory(history.id)
+      ElMessage({
+        type: 'success',
+        message: '历史记录已删除',
+      })
+    })
+    .catch(() => {
+      // 用户取消删除
+    })
+}
+
 // 在组件挂载时从localStorage恢复侧边栏状态
 onMounted(() => {
   const savedState = localStorage.getItem('sidebarMinimized')
   if (savedState !== null) {
     isMinimized.value = savedState === 'true'
   }
+
+  // 加载历史记录
+  historyStore.loadFromLocalStorage()
 })
 </script>
 
@@ -182,7 +256,8 @@ onMounted(() => {
   flex-direction: column;
   width: 100%;
   height: 100vh;
-  background-color: #3C4A3E; /* 更深的绿色，与主页面形成对比 */
+  background-color: #3C4A3E;
+  /* 更深的绿色，与主页面形成对比 */
   border-right: 1px solid #2B3F2B;
   padding: 15px 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
@@ -378,19 +453,100 @@ onMounted(() => {
 /* Element Plus覆盖样式 */
 :deep(.el-menu) {
   border-right: none;
-  background-color: #82ae89; /* 与侧边栏背景色一致 */
+  background-color: #82ae89;
+  /* 与侧边栏背景色一致 */
 }
 
-:deep(.el-menu-item), :deep(.el-sub-menu__title) {
+/* 历史记录区域 */
+.history-section {
+  margin: 15px 0;
+  padding: 0 15px;
+}
+
+.history-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #E8E0D0;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid rgba(232, 224, 208, 0.2);
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.history-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 10px;
+  border-radius: 6px;
+  background-color: rgba(232, 224, 208, 0.1);
+  transition: all 0.2s ease-in-out;
+}
+
+.history-item-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  cursor: pointer;
+}
+
+.history-item:hover {
+  background-color: rgba(232, 224, 208, 0.2);
+}
+
+.delete-icon {
+  color: #E8E0D0;
+  opacity: 0.6;
+  cursor: pointer;
+  font-size: 14px;
+  margin-left: 5px;
+  transition: all 0.2s ease-in-out;
+}
+
+.delete-icon:hover {
+  opacity: 1;
+  color: #ff7875;
+}
+
+.history-item-title {
+  font-size: 13px;
+  color: #E8E0D0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 160px;
+}
+
+.empty-history {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #7D7060;
+  font-size: 12px;
+  padding: 10px 15px;
+  font-style: italic;
+}
+
+:deep(.el-menu-item),
+:deep(.el-sub-menu__title) {
   height: 50px;
   line-height: 50px;
-  color: #000000 !important; /* 浅色文字，提高对比度 */
+  color: #000000 !important;
+  /* 浅色文字，提高对比度 */
   transition: all 0.3s ease-in-out;
 }
 
 :deep(.el-menu-item.is-active) {
-  background-color: #556B2F; /* 活动项背景色 */
-  color: #FFFFFF !important; /* 活动项文字颜色 */
+  background-color: #556B2F;
+  /* 活动项背景色 */
+  color: #FFFFFF !important;
+  /* 活动项文字颜色 */
   transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
 }
 

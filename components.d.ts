@@ -11,6 +11,7 @@ declare module 'vue' {
     CommunityContent: typeof import('./src/components/CommunityContent.vue')['default']
     ConmmunityContent: typeof import('./src/components/CommunityContent.vue')['default']
     DataDashboard: typeof import('./src/components/DataDashboard.vue')['default']
+    ElAlert: typeof import('element-plus/es')['ElAlert']
     ElAside: typeof import('element-plus/es')['ElAside']
     ElButton: typeof import('element-plus/es')['ElButton']
     ElCard: typeof import('element-plus/es')['ElCard']
