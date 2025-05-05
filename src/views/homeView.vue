@@ -1,9 +1,9 @@
 <template>
   <div class="search-content" :class="{ 'chat-history-active': chatHistory.length > 0 }">
     <!-- 对话标题 -->
-    <div class="conversation-title" v-if="chatHistory.length > 0 && conversationTitle">
+    <!-- <div class="conversation-title" v-if="chatHistory.length > 0 && conversationTitle">
       {{ conversationTitle }}
-    </div>
+    </div> -->
     <!-- 页面标题 -->
     <div class="search-title">
       <h1 v-if="!conversationTitle">您想了解哪些林下经济知识？</h1>
@@ -69,17 +69,6 @@
         </el-card>
       </div>
     </div>
-
-    <!-- 清除历史确认对话框 -->
-    <el-dialog v-model="showClearHistoryDialog" title="清除历史记录" width="30%" align-center>
-      <span>确定要清除所有聊天历史记录吗？此操作无法撤销。</span>
-      <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="showClearHistoryDialog = false">取消</el-button>
-          <el-button type="danger" @click="clearChatHistory">确定清除</el-button>
-        </span>
-      </template>
-    </el-dialog>
 
     <!-- 错误提示 -->
     <el-alert v-if="errorInfo.show" :title="errorInfo.title" :description="errorInfo.message" type="error" show-icon
@@ -488,7 +477,9 @@ export default {
             const errorData = await response.json();
             errorDetail = JSON.stringify(errorData);
           } catch (e) {
-            errorDetail = '无法解析错误详情';
+            // 记录具体错误信息
+            console.error('解析错误响应失败:', e.message);
+            errorDetail = `无法解析错误详情: ${e.message}`;
           }
 
           throw new Error(`API错误: ${response.status} ${response.statusText}. 详情: ${errorDetail}`);

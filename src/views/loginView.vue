@@ -50,10 +50,10 @@
               type="tel"
               class="form-input"
               placeholder="请输入手机号码"
-              v-model="formData.phone"
-              :class="{ 'error-input': errors.phone }"
+              v-model="formData.phoneNumber"
+              :class="{ 'error-input': errors.phoneNumber }"
             >
-            <p v-if="errors.phone" class="error-message">{{ errors.phone }}</p>
+            <p v-if="errors.phoneNumber" class="error-message">{{ errors.phoneNumber }}</p>
           </div>
 
           <div class="form-group">
@@ -110,107 +110,122 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'LoginView',
-  data() {
-    return {
-      formData: {
-        phone: '',
-        password: '',
-        remember: false
-      },
-      errors: {
-        phone: '',
-        password: ''
-      },
-      isSubmitting: false,
-      showPassword: false
-    }
-  },
-  methods: {
-    togglePassword() {
-      this.showPassword = !this.showPassword;
-    },
-    validateForm() {
-      let isValid = true;
-      // 重置错误消息
-      for (let key in this.errors) {
-        this.errors[key] = '';
-      }
+<script setup>
+import { ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { ElMessage } from 'element-plus';
+import { loginApi } from '@/api/login';
 
-      // 手机号验证
-      const phoneRegex = /^1[3-9]\d{9}$/;
-      if (!this.formData.phone) {
-        this.errors.phone = '请输入手机号码';
-        isValid = false;
-      } else if (!phoneRegex.test(this.formData.phone)) {
-        this.errors.phone = '请输入有效的手机号码';
-        isValid = false;
-      }
+const router = useRouter();
 
-      // 密码验证
-      if (!this.formData.password) {
-        this.errors.password = '请输入密码';
-        isValid = false;
-      }
+// 表单数据
+const formData = ref({
+  phoneNumber: '',
+  password: '',
+  remember: false
+});
 
-      return isValid;
-    },
-    handleLogin() {
-      if (!this.validateForm()) return;
+// 错误信息
+const errors = ref({
+  phoneNumber: '',
+  password: ''
+});
 
-      this.isSubmitting = true;
+// 状态管理
+const isSubmitting = ref(false);
+const showPassword = ref(false);
 
-      // 这里可以添加登录API调用
-      console.log('提交登录表单:', this.formData);
+// 切换密码显示
+const togglePassword = () => {
+  showPassword.value = !showPassword.value;
+};
 
-      // 模拟API调用过程
-      setTimeout(() => {
-        this.isSubmitting = false;
-
-        // 模拟成功登录
-        this.$message({
-          type: 'success',
-          message: '登录成功！'
-        });
-
-        // 登录成功后跳转到首页或其他页面
-        setTimeout(() => {
-          this.$router.push('/dashboard');
-        }, 1000);
-      }, 1500);
-    },
-    forgotPassword() {
-      this.$router.push('/forgot-password');
-    },
-    loginWithMethod(method) {
-      console.log(`使用${method}登录`);
-
-      // 根据不同的登录方式执行不同的操作
-      switch(method) {
-        case 'wechat':
-          this.$message({
-            type: 'info',
-            message: '正在跳转到微信登录...'
-          });
-          break;
-        case 'alipay':
-          this.$message({
-            type: 'info',
-            message: '正在跳转到支付宝登录...'
-          });
-          break;
-        case 'sms':
-          this.$router.push('/sms-login');
-          break;
-      }
-    },
-    goToRegister() {
-      this.$router.push('/register');
-    }
+// 表单验证
+const validateForm = () => {
+  let isValid = true;
+  // 重置错误消息
+  for (let key in errors.value) {
+    errors.value[key] = '';
   }
-}
+
+  // 手机号验证
+  const phoneNumberRegex = /^1[3-9]\d{9}$/;
+  if (!formData.value.phoneNumber) {
+    errors.value.phoneNumber = '请输入手机号码';
+    isValid = false;
+  } else if (!phoneNumberRegex.test(formData.value.phoneNumber)) {
+    errors.value.phoneNumber = '请输入有效的手机号码';
+    isValid = false;
+  }
+
+  // 密码验证
+  if (!formData.value.password) {
+    errors.value.password = '请输入密码';
+    isValid = false;
+  }
+
+  return isValid;
+};
+
+// 登录处理
+const handleLogin = async() => {
+  if (!validateForm()) return;
+
+  isSubmitting.value = true;
+
+  try {
+    const result = await loginApi(formData.value);
+    console.log('Login result:', result); // 调试用
+
+    // 根据后端返回的结构判断成功条件
+    if (result.code === 1 || result.success) {
+      ElMessage.success('登录成功');
+      // 可能需要保存token等信息
+      router.push('/dashboard'); // 跳转到仪表板
+    } else {
+      ElMessage.error(result.msg || '登录失败');
+    }
+  } catch (error) {
+    console.error('Login error:', error);
+    ElMessage.error(error.msg || '登录失败，请检查网络连接');
+  } finally {
+    isSubmitting.value = false;
+  }
+};
+
+// 忘记密码
+const forgotPassword = () => {
+  router.push('/forgot-password');
+};
+
+// 第三方登录方式
+const loginWithMethod = (method) => {
+  console.log(`使用${method}登录`);
+
+  // 根据不同的登录方式执行不同的操作
+  switch(method) {
+    case 'wechat':
+      ElMessage({
+        type: 'info',
+        message: '正在跳转到微信登录...'
+      });
+      break;
+    case 'alipay':
+      ElMessage({
+        type: 'info',
+        message: '正在跳转到支付宝登录...'
+      });
+      break;
+    case 'sms':
+      router.push('/sms-login');
+      break;
+  }
+};
+
+// 前往注册
+const goToRegister = () => {
+  router.push('/register');
+};
 </script>
 
 <style scoped>

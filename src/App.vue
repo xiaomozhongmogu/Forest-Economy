@@ -3,6 +3,11 @@
 </template>
 
 <script>
+// import { useUserStore } from '@/stores/userStore'
+
+// const userStore = useUserStore()
+// userStore.init()  // 应用启动时初始化
+
 export default {
   name: 'App'
 }
