@@ -1,11 +1,9 @@
 <template>
   <el-container class="layout-container" :class="{ 'minimized': isMinimized }">
-    <!-- 侧边栏 -->
     <el-aside :width="isMinimized ? '64px' : '230px'" class="aside-container">
       <el-menu :default-active="activeMenu" class="sidebar" :class="{ 'minimized': isMinimized }"
         :collapse="isMinimized" :collapse-transition="true" background-color="#FDFBF7" text-color="#2B3F2B"
         active-text-color="#556B2F" router>
-        <!-- Logo区域 -->
         <div class="logo-container">
           <div class="logo" v-if="!isMinimized">
             <span class="logo-text">🌿林下经济</span>
@@ -22,7 +20,6 @@
           </el-button>
         </div>
 
-        <!-- 新建项目 -->
         <div class="new-project-container">
           <el-button class="new-project-button" type="primary" plain @click="createNewProject">
             <el-icon>
@@ -33,7 +30,6 @@
           </el-button>
         </div>
 
-        <!-- 导航菜单 -->
         <el-menu-item index="/home">
           <el-icon>
             <House />
@@ -60,7 +56,7 @@
             <el-icon>
               <Collection />
             </el-icon>
-            <span>资源库</span>
+            <span v-if="!isMinimized">资源库</span>
           </template>
           <el-menu-item-group>
             <el-menu-item index="/resources/mushroom">林下食用菌培育技术</el-menu-item>
@@ -78,7 +74,6 @@
           <template #title>数据管理与分析</template>
         </el-menu-item>
 
-        <!-- 历史记录区域 -->
         <div class="history-section" v-if="!isMinimized && historyStore.chatHistory.length > 0">
           <div class="history-title">历史记录</div>
           <div class="history-list">
@@ -96,9 +91,7 @@
           </div>
         </div>
 
-        <!-- 底部区域 -->
         <div class="bottom-section" v-if="!isMinimized">
-          <!-- 升级区域 -->
           <el-card class="upgrade-section" shadow="never">
             <template #header>
               <div class="upgrade-title">不知道如何使用？</div>
@@ -115,17 +108,37 @@
             </el-button>
           </el-card>
 
-          <!-- 登录按钮 -->
-          <div class="auth-buttons">
+          <div class="auth-buttons" v-if="!isLoggedIn">
             <el-button type="primary" class="auth-button login-button" size="large" @click="$router.push('/login')">
               登录
             </el-button>
+          </div>
+
+          <div class="user-buttons" v-if="isLoggedIn">
+            <el-dropdown @command="handleUserCommand" trigger="click" placement="top-end">
+              <el-button type="default" class="user-avatar-button" :class="{ 'minimized': isMinimized }">
+                <el-icon><User /></el-icon>
+                <span v-if="!isMinimized" class="username-display">{{ userStore.userInfo.username || '用户' }}</span>
+              </el-button>
+              <template #dropdown>
+                <el-dropdown-menu>
+                  <div class="user-greeting">
+                    {{ userStore.userInfo.username || '用户' }},您好
+                  </div>
+                  <el-dropdown-item command="logout" divided>
+                    <el-icon><SwitchButton /></el-icon>退出登录
+                  </el-dropdown-item>
+                  <el-dropdown-item command="deleteAccount" class="delete-account-item">
+                    <el-icon><Delete /></el-icon>注销帐号
+                  </el-dropdown-item>
+                </el-dropdown-menu>
+              </template>
+            </el-dropdown>
           </div>
         </div>
       </el-menu>
     </el-aside>
 
-    <!-- 主容器 -->
     <el-container class="main-container">
       <div class="content-wrapper">
         <router-view />
@@ -150,11 +163,24 @@ import {
   Plus,
   TopRight,
   Clock,
-  Close
+  Close,
+  User, // <-- Added
+  SwitchButton, // <-- Added
+  Delete // <-- Added
 } from '@element-plus/icons-vue'
+import { useUserStore } from '@/stores/userStore'; // 假设你的 store 路径
+import { deleteByIdApi } from '@/api/user'
 
 // 侧边栏状态
 const isMinimized = ref(false)
+
+// Placeholder user data - replace with actual data from your auth system
+const userStore = useUserStore();
+
+const isLoggedIn = computed(() => userStore.isLoggedIn)
+
+console.log('登录成功，用户信息:', userStore.userInfo);
+console.log('是否登录', userStore.isLoggedIn);
 
 // 获取当前路由和路由器
 const route = useRoute()
@@ -165,7 +191,6 @@ const historyStore = useHistoryStore()
 
 // 根据当前路由路径动态设置激活的菜单项
 const activeMenu = computed(() => {
-  // 处理嵌套路由情况
   if (route.path.includes('/resources/')) {
     return route.path
   }
@@ -175,19 +200,16 @@ const activeMenu = computed(() => {
 // 切换侧边栏展开/收起状态
 const toggleMinimize = () => {
   isMinimized.value = !isMinimized.value
-  // 可以保存状态到localStorage
   localStorage.setItem('sidebarMinimized', isMinimized.value)
 }
 
 // 创建新项目
 const createNewProject = () => {
-  // 刷新路由到新的homeView
   router.push({ path: '/home', query: { new: Date.now() } })
 }
 
 // 加载历史记录
 const loadHistory = (history) => {
-  // 跳转到主页并加载特定历史
   router.push({ path: '/home', query: { historyId: history.id } })
 }
 
@@ -203,7 +225,6 @@ const confirmDelete = (history) => {
     }
   )
     .then(() => {
-      // 删除历史记录
       historyStore.removeHistory(history.id)
       ElMessage({
         type: 'success',
@@ -215,15 +236,73 @@ const confirmDelete = (history) => {
     })
 }
 
+// 处理用户下拉菜单命令
+const handleUserCommand = (command) => {
+  if (command === 'logout') {
+    logoutUser()
+  } else if (command === 'deleteAccount') {
+    confirmDeleteAccount()
+  }
+}
+
+// 退出登录逻辑
+const logoutUser = () => {
+  userStore.clearUserInfo()
+  ElMessage.success('已成功退出登录')
+}
+
+// 确认注销帐号逻辑
+const confirmDeleteAccount = () => {
+  ElMessageBox.confirm(
+    '您确定要注销您的帐号吗？此操作不可逆，您的所有数据将被永久删除。',
+    '注销帐号确认',
+    {
+      confirmButtonText: '确定注销',
+      cancelButtonText: '取消',
+      type: 'error',
+      // confirmButtonClass: 'el-button--danger', // Element Plus might handle this by type 'error'
+    }
+  )
+    .then(() => {
+      deleteUserAccount()
+    })
+    .catch(() => {
+      ElMessage.info('已取消注销帐号操作')
+    })
+}
+
+// 注销帐号逻辑
+const deleteUserAccount = async() => {
+  // Replace with your actual account deletion logic (e.g., API call to backend)
+  const result = await deleteByIdApi(userStore.userInfo.id);
+  if (result.code === 1 || result.success) {
+    ElMessage.success('您的帐号已成功注销');
+    userStore.clearUserInfo();
+  } else {
+    ElMessage.error('注销帐号失败，请重试');
+  }
+  console.log('Deleting account for:', userStore.userInfo.username)
+}
+
+
 // 在组件挂载时从localStorage恢复侧边栏状态
 onMounted(() => {
   const savedState = localStorage.getItem('sidebarMinimized')
   if (savedState !== null) {
     isMinimized.value = savedState === 'true'
   }
-
-  // 加载历史记录
   historyStore.loadFromLocalStorage()
+
+  // ** Example: Check if user is logged in (replace with your actual auth check) **
+  // For instance, you might check for a token in localStorage
+  // const authToken = localStorage.getItem('authToken');
+  // if (authToken) {
+  //   isLoggedIn.value = true;
+  //   // Fetch user details if needed, e.g.,
+  //   // user.value.name = await fetchUserNameAPI();
+  // } else {
+  //   isLoggedIn.value = false;
+  // }
 })
 </script>
 
@@ -256,9 +335,8 @@ onMounted(() => {
   flex-direction: column;
   width: 100%;
   height: 100vh;
-  background-color: #3C4A3E;
-  /* 更深的绿色，与主页面形成对比 */
-  border-right: 1px solid #2B3F2B;
+  background-color: #FDFBF7; /* Existing background */
+  border-right: 1px solid #E8E0D0; /* Softer border */
   padding: 15px 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', sans-serif;
   transition: width 0.3s ease-in-out;
@@ -280,6 +358,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   align-items: center;
+  background-color: #F4F5F7; /* Light background for main content area */
 }
 
 /* 当侧边栏折叠时调整主容器 */
@@ -432,6 +511,7 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 8px;
+  margin-top: 10px; /* Added margin */
 }
 
 .auth-button {
@@ -450,32 +530,139 @@ onMounted(() => {
   background-color: #455A20;
 }
 
+/* 用户按钮区域 - NEW STYLES */
+.user-buttons {
+  margin-top: 10px; /* Space above user button */
+}
+
+.user-avatar-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start; /* Align icon and text to the start */
+  padding: 0 12px;
+  height: 44px; /* Slightly larger */
+  border-radius: 8px;
+  background-color: #f7f7f7; /* Light background for the button */
+  border: 1px solid #e0e0e0; /* Soft border */
+  color: #333; /* Text color */
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.user-avatar-button:hover,
+.user-avatar-button:focus {
+  background-color: #e9e9e9; /* Darker on hover/focus */
+  border-color: #d0d0d0;
+  color: #2B3F2B;
+}
+
+.user-avatar-button .el-icon {
+  font-size: 18px; /* Icon size */
+  margin-right: 10px; /* Space between icon and username */
+  color: #556B2F; /* Icon color to match theme */
+}
+
+.user-avatar-button.minimized .el-icon {
+  margin-right: 0;
+}
+
+.user-avatar-button.minimized {
+  justify-content: center;
+  padding: 0;
+  width: 44px; /* Square button when minimized */
+}
+
+
+.username-display {
+  font-weight: 500;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-grow: 1; /* Allow username to take available space */
+  text-align: left;
+}
+
+/* Styles for the dropdown menu */
+.el-dropdown-menu {
+  padding: 0 !important; /* Remove default padding */
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border: 1px solid #EBEEF5;
+}
+
+.user-greeting {
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #606266; /* Standard text color */
+  background-color: #FAFAFA; /* Light background for greeting */
+  border-bottom: 1px solid #EBEEF5; /* Separator */
+  font-weight: 500;
+}
+
+:deep(.el-dropdown-menu__item) {
+  padding: 10px 16px !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  display: flex !important;
+  align-items: center !important;
+}
+
+:deep(.el-dropdown-menu__item .el-icon) {
+  margin-right: 8px;
+  font-size: 16px; /* Consistent icon size in dropdown */
+  color: #556B2F; /* Match icon color */
+}
+
+:deep(.el-dropdown-menu__item.delete-account-item) {
+  color: #F56C6C !important; /* Element Plus danger color for text */
+}
+
+:deep(.el-dropdown-menu__item.delete-account-item .el-icon) {
+  color: #F56C6C !important; /* Danger color for icon */
+}
+
+:deep(.el-dropdown-menu__item.delete-account-item:hover) {
+  background-color: #FEF0F0 !important; /* Light red background on hover */
+  color: #F56C6C !important;
+}
+
+:deep(.el-dropdown-menu__item--divided) {
+  margin-top: 6px !important;
+  border-top: 1px solid #EBEEF5 !important; /* Softer divider */
+}
+/* END OF NEW USER BUTTON STYLES */
+
+
 /* Element Plus覆盖样式 */
 :deep(.el-menu) {
   border-right: none;
-  background-color: #82ae89;
-  /* 与侧边栏背景色一致 */
+  /* background-color: #82ae89; */ /* Removed to use parent's #FDFBF7 */
 }
 
 /* 历史记录区域 */
 .history-section {
   margin: 15px 0;
   padding: 0 15px;
+  max-height: 200px; /* Limit height and make it scrollable if needed */
+  overflow-y: auto;
 }
 
 .history-title {
-  font-size: 14px;
+  font-size: 13px; /* Slightly smaller */
   font-weight: 600;
-  color: #E8E0D0;
-  margin-bottom: 10px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid rgba(232, 224, 208, 0.2);
+  color: #556B2F; /* Dark green to match theme */
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid rgba(85, 107, 47, 0.2); /* Themed border */
+  text-transform: uppercase; /* Optional: for style */
+  letter-spacing: 0.5px; /* Optional */
 }
 
 .history-list {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 6px; /* Slightly increased gap */
 }
 
 .history-item {
@@ -484,7 +671,7 @@ onMounted(() => {
   justify-content: space-between;
   padding: 8px 10px;
   border-radius: 6px;
-  background-color: rgba(232, 224, 208, 0.1);
+  background-color: rgba(85, 107, 47, 0.05); /* Very light green tint */
   transition: all 0.2s ease-in-out;
 }
 
@@ -494,15 +681,17 @@ onMounted(() => {
   gap: 8px;
   flex: 1;
   cursor: pointer;
+  color: #2B3F2B; /* Dark text for readability */
 }
 
 .history-item:hover {
-  background-color: rgba(232, 224, 208, 0.2);
+  background-color: rgba(85, 107, 47, 0.1); /* Slightly darker on hover */
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
 .delete-icon {
-  color: #E8E0D0;
-  opacity: 0.6;
+  color: #A8B3A8; /* Softer delete icon color */
+  opacity: 0.7;
   cursor: pointer;
   font-size: 14px;
   margin-left: 5px;
@@ -511,16 +700,16 @@ onMounted(() => {
 
 .delete-icon:hover {
   opacity: 1;
-  color: #ff7875;
+  color: #ff6b6b; /* Brighter red on hover */
 }
 
 .history-item-title {
   font-size: 13px;
-  color: #E8E0D0;
+  color: #2B3F2B; /* Ensuring readability */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 160px;
+  max-width: 150px; /* Adjust if needed based on sidebar width */
 }
 
 .empty-history {
@@ -535,20 +724,37 @@ onMounted(() => {
 
 :deep(.el-menu-item),
 :deep(.el-sub-menu__title) {
-  height: 50px;
-  line-height: 50px;
-  color: #000000 !important;
-  /* 浅色文字，提高对比度 */
+  height: 48px; /* Slightly reduced height */
+  line-height: 48px; /* Match height */
+  color: #2B3F2B !important;
+  font-weight: 500; /* Slightly bolder */
   transition: all 0.3s ease-in-out;
+  border-radius: 6px; /* Rounded corners for menu items */
+  margin: 0 10px 4px 10px; /* Add horizontal margin and small bottom margin */
+  padding-left: 15px !important; /* Adjust padding */
+}
+:deep(.el-sub-menu .el-menu-item) {
+  height: 40px; /* Sub-menu items even smaller */
+  line-height: 40px;
+  font-size: 13px;
+  background-color: transparent !important; /* Ensure sub-items don't have strange bg */
+  margin: 0 0 2px 0;
+  padding-left: 30px !important; /* Indent sub-menu items */
 }
 
+
 :deep(.el-menu-item.is-active) {
-  background-color: #556B2F;
-  /* 活动项背景色 */
+  background-color: #556B2F !important;
   color: #FFFFFF !important;
-  /* 活动项文字颜色 */
-  transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out;
+  box-shadow: 0 2px 5px rgba(85, 107, 47, 0.3);
 }
+
+:deep(.el-menu-item:hover),
+:deep(.el-sub-menu__title:hover) {
+  background-color: #EFF4ED !important; /* Lighter green on hover */
+  color: #556B2F !important;
+}
+
 
 :deep(.el-card__header) {
   padding: 10px 15px;

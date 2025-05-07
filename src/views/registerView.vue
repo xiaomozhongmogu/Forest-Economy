@@ -47,13 +47,13 @@
           <div class="form-row">
             <div class="form-group full-width">
               <label class="form-label">手机号码</label>
-              <div class="phone-container">
+              <div class="phoneNumber-container">
                 <input
                   type="tel"
-                  class="form-input phone-input"
+                  class="form-input phoneNumber-input"
                   placeholder="请输入手机号码"
-                  v-model="formData.phone"
-                  :class="{ 'error-input': errors.phone }"
+                  v-model="formData.phoneNumber"
+                  :class="{ 'error-input': errors.phoneNumber }"
                 >
                 <button
                   type="button"
@@ -64,7 +64,7 @@
                   {{ cooldown > 0 ? `${cooldown}秒后重试` : '获取验证码' }}
                 </button>
               </div>
-              <p v-if="errors.phone" class="error-message">{{ errors.phone }}</p>
+              <p v-if="errors.phoneNumber" class="error-message">{{ errors.phoneNumber }}</p>
             </div>
           </div>
 
@@ -108,7 +108,7 @@
                   :class="{ 'error-input': errors.password }"
                 >
                 <span class="password-toggle" @click="togglePassword('password')">
-                  {{ showPassword ? '👁️' : '👁️‍🗨️' }}
+                  {{ showPassword ? '😮' : '😑' }}
                 </span>
               </div>
               <p v-if="errors.password" class="error-message">{{ errors.password }}</p>
@@ -125,7 +125,7 @@
                   :class="{ 'error-input': errors.confirmPassword }"
                 >
                 <span class="password-toggle" @click="togglePassword('confirm')">
-                  {{ showConfirmPassword ? '👁️' : '👁️‍🗨️' }}
+                  {{ showConfirmPassword ? '😮' : '😑' }}
                 </span>
               </div>
               <p v-if="errors.confirmPassword" class="error-message">{{ errors.confirmPassword }}</p>
@@ -161,193 +161,217 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'RegisterView',
-  data() {
-    return {
-      formData: {
-        phone: '',
-        verificationCode: '',
-        username: '',
-        password: '',
-        confirmPassword: ''
-      },
-      errors: {
-        phone: '',
-        verificationCode: '',
-        username: '',
-        password: '',
-        confirmPassword: ''
-      },
-      cooldown: 0,
-      cooldownTimer: null,
-      isSubmitting: false,
-      showPassword: false,
-      showConfirmPassword: false
-    }
-  },
-  computed: {
-    passwordStrength() {
-      const password = this.formData.password;
-      if (!password) return 0;
+<script setup>
+import { ref, reactive, computed, onBeforeUnmount, getCurrentInstance } from 'vue';
+import { useRouter } from 'vue-router';
+import { ElMessage } from 'element-plus'
+import { registerApi } from '@/api/register'
 
-      let strength = 0;
-      // 长度超过8
-      if (password.length >= 8) strength++;
-      // 包含小写字母
-      if (/[a-z]/.test(password)) strength++;
-      // 包含大写字母
-      if (/[A-Z]/.test(password)) strength++;
-      // 包含数字
-      if (/[0-9]/.test(password)) strength++;
-      // 包含特殊字符
-      if (/[^a-zA-Z0-9]/.test(password)) strength++;
 
-      return Math.min(4, strength);
-    },
-    passwordStrengthText() {
-      const strength = this.passwordStrength;
-      const texts = ['弱', '一般', '良好', '强'];
-      return texts[Math.min(3, strength - 1)] || '弱';
-    }
-  },
-  methods: {
-    togglePassword(type) {
-      if (type === 'password') {
-        this.showPassword = !this.showPassword;
-      } else {
-        this.showConfirmPassword = !this.showConfirmPassword;
-      }
-    },
-    validateForm() {
-      let isValid = true;
-      // 重置错误消息
-      for (let key in this.errors) {
-        this.errors[key] = '';
-      }
+// 获取全局属性（如果使用了全局注入的方式）
+const { proxy } = getCurrentInstance();
+const router = useRouter();
 
-      // 手机号验证
-      const phoneRegex = /^1[3-9]\d{9}$/;
-      if (!this.formData.phone) {
-        this.errors.phone = '请输入手机号码';
-        isValid = false;
-      } else if (!phoneRegex.test(this.formData.phone)) {
-        this.errors.phone = '请输入有效的手机号码';
-        isValid = false;
-      }
+// 表单数据
+const formData = reactive({
+  phoneNumber: '',
+  verificationCode: '',
+  username: '',
+  password: '',
+  confirmPassword: ''
+});
 
-      // 验证码验证
-      if (!this.formData.verificationCode) {
-        this.errors.verificationCode = '请输入验证码';
-        isValid = false;
-      } else if (this.formData.verificationCode.length !== 6) {
-        this.errors.verificationCode = '验证码应为6位数字';
-        isValid = false;
-      }
+// 错误信息
+const errors = reactive({
+  phoneNumber: '',
+  verificationCode: '',
+  username: '',
+  password: '',
+  confirmPassword: ''
+});
 
-      // 用户名验证
-      if (!this.formData.username) {
-        this.errors.username = '请输入用户名';
-        isValid = false;
-      } else if (this.formData.username.length < 3) {
-        this.errors.username = '用户名长度不能少于3个字符';
-        isValid = false;
-      }
+// 验证码冷却相关
+const cooldown = ref(0);
+const cooldownTimer = ref(null);
+const isSubmitting = ref(false);
+const showPassword = ref(false);
+const showConfirmPassword = ref(false);
 
-      // 密码验证
-      if (!this.formData.password) {
-        this.errors.password = '请设置密码';
-        isValid = false;
-      } else if (this.formData.password.length < 8) {
-        this.errors.password = '密码长度不能少于8个字符';
-        isValid = false;
-      }
+// 计算属性：密码强度
+// 计算属性：密码强度
+const passwordStrength = computed(() => {
+  const password = formData.password;
+  if (!password) return 0;
 
-      // 确认密码验证
-      if (!this.formData.confirmPassword) {
-        this.errors.confirmPassword = '请确认密码';
-        isValid = false;
-      } else if (this.formData.confirmPassword !== this.formData.password) {
-        this.errors.confirmPassword = '两次输入的密码不一致';
-        isValid = false;
-      }
+  let strength = 0;
+  // 长度超过8
+  if (password.length >= 8) strength++;
+  // 包含小写字母
+  if (/[a-z]/.test(password)) strength++;
+  // 包含大写字母
+  if (/[A-Z]/.test(password)) strength++;
+  // 包含数字
+  if (/[0-9]/.test(password)) strength++;
+  // 包含特殊字符
+  if (/[^a-zA-Z0-9]/.test(password)) strength++;
 
-      return isValid;
-    },
-    getVerificationCode() {
-      if (this.cooldown > 0) return;
+  return strength; // 移除Math.min限制，让它返回0-5范围的值
+});
 
-      // 验证手机号
-      const phoneRegex = /^1[3-9]\d{9}$/;
-      if (!this.formData.phone) {
-        this.errors.phone = '请输入手机号码';
-        return;
-      } else if (!phoneRegex.test(this.formData.phone)) {
-        this.errors.phone = '请输入有效的手机号码';
-        return;
-      }
+// 计算属性：密码强度文本
+const passwordStrengthText = computed(() => {
+  const strength = passwordStrength.value;
+  const texts = ['极弱', '弱', '一般', '良好', '强'];
+  return texts[Math.min(4, strength)] || '极弱'; // 调整索引范围为0-4
+});
 
-      // 开始倒计时
-      this.cooldown = 60;
-      this.cooldownTimer = setInterval(() => {
-        this.cooldown--;
-        if (this.cooldown <= 0) {
-          clearInterval(this.cooldownTimer);
-        }
-      }, 1000);
-
-      // 这里可以添加获取验证码的API调用
-      console.log('获取验证码，手机号:', this.formData.phone);
-
-      // 模拟API调用成功
-      this.$message({
-        type: 'success',
-        message: '验证码已发送到您的手机'
-      });
-    },
-    handleRegister() {
-      if (!this.validateForm()) return;
-
-      this.isSubmitting = true;
-
-      // 这里可以添加注册API调用
-      console.log('提交注册表单:', this.formData);
-
-      // 模拟API调用过程
-      setTimeout(() => {
-        this.isSubmitting = false;
-
-        // 模拟成功注册
-        this.$message({
-          type: 'success',
-          message: '注册成功！'
-        });
-
-        // 注册成功后跳转到登录页
-        setTimeout(() => {
-          this.goToLogin();
-        }, 1500);
-      }, 2000);
-    },
-    openAgreement(type) {
-      const title = type === 'terms' ? '用户协议' : '隐私政策';
-      this.$dialog.alert({
-        title: title,
-        message: `这是${title}的内容...`
-      });
-    },
-    goToLogin() {
-      this.$router.push('/login');
-    }
-  },
-  beforeUnmount() {
-    // 清除定时器
-    if (this.cooldownTimer) {
-      clearInterval(this.cooldownTimer);
-    }
+// 切换密码显示/隐藏
+const togglePassword = (type) => {
+  if (type === 'password') {
+    showPassword.value = !showPassword.value;
+  } else {
+    showConfirmPassword.value = !showConfirmPassword.value;
   }
-}
+};
+
+// 表单验证
+const validateForm = () => {
+  let isValid = true;
+  // 重置错误消息
+  for (let key in errors) {
+    errors[key] = '';
+  }
+
+  // 手机号验证
+  const phoneRegex = /^1[3-9]\d{9}$/;
+  if (!formData.phoneNumber) {
+    errors.phoneNumber = '请输入手机号码';
+    isValid = false;
+  } else if (!phoneRegex.test(formData.phoneNumber)) {
+    errors.phoneNumber = '请输入有效的手机号码';
+    isValid = false;
+  }
+
+  // 验证码验证
+  if (!formData.verificationCode) {
+    errors.verificationCode = '请输入验证码';
+    isValid = false;
+  }
+
+  // 用户名验证
+  if (!formData.username) {
+    errors.username = '请输入用户名';
+    isValid = false;
+  } else if (formData.username.length < 3) {
+    errors.username = '用户名长度不能少于3个字符';
+    isValid = false;
+  }
+
+  // 密码验证
+  if (!formData.password) {
+    errors.password = '请输入密码';
+    isValid = false;
+  } else if (formData.password.length < 8) {
+    errors.password = '密码长度不能少于8个字符';
+    isValid = false;
+  }
+
+  // 确认密码验证
+  if (!formData.confirmPassword) {
+    errors.confirmPassword = '请确认密码';
+    isValid = false;
+  } else if (formData.confirmPassword !== formData.password) {
+    errors.confirmPassword = '两次输入的密码不一致';
+    isValid = false;
+  }
+
+  return isValid;
+};
+
+// 获取验证码
+const getVerificationCode = () => {
+  if (cooldown.value > 0) return;
+
+  // 验证手机号
+  const phoneRegex = /^1[3-9]\d{9}$/;
+  if (!formData.phoneNumber) {
+    errors.phoneNumber = '请输入手机号码';
+    return;
+  } else if (!phoneRegex.test(formData.phoneNumber)) {
+    errors.phoneNumber = '请输入有效的手机号码';
+    return;
+  }
+
+  // 开始倒计时
+  cooldown.value = 60;
+  cooldownTimer.value = setInterval(() => {
+    cooldown.value--;
+    if (cooldown.value <= 0) {
+      clearInterval(cooldownTimer.value);
+    }
+  }, 1000);
+
+  // 这里可以添加获取验证码的API调用
+  console.log('获取验证码，手机号:', formData.phoneNumber);
+
+  // 模拟API调用成功
+  proxy.$message({
+    type: 'success',
+    message: '验证码已发送到您的手机'
+  });
+};
+
+// 处理注册
+const handleRegister = async() => {
+  if (!validateForm()) return;
+
+  isSubmitting.value = true;
+
+  console.log('提交注册表单:', formData);
+
+  try {
+    const result = await registerApi(formData);
+
+    if (result.code === 1 || result.success) {
+
+      ElMessage.success('注册成功');
+      router.push('/login');
+    } else {
+      ElMessage.error(result.message || '注册失败');
+    }
+  } catch (error) {
+    console.error('注册错误:', error);
+    ElMessage.error(error.message || '注册失败，请检查网络连接');
+  } finally {
+    isSubmitting.value = false;
+  }
+};
+
+// 打开协议
+const openAgreement = (type) => {
+  const title = type === 'terms' ? '用户协议' : '隐私政策';
+  proxy.$dialog.alert({
+    title: title,
+    message: `这是${title}的内容...`
+  });
+};
+
+// 跳转到登录页
+const goToLogin = () => {
+  router.push('/login');
+};
+
+// 组件卸载前清除定时器
+onBeforeUnmount(() => {
+  if (cooldownTimer.value) {
+    clearInterval(cooldownTimer.value);
+  }
+});
+
+// 保持组件名称与原始组件一致
+defineOptions({
+  name: 'RegisterView'
+});
 </script>
 
 <style scoped>
@@ -556,12 +580,12 @@ export default {
   margin-bottom: 0;
 }
 
-.phone-container {
+.phoneNumber-container {
   display: flex;
   gap: 12px;
 }
 
-.phone-input {
+.phoneNumber-input {
   flex: 1;
 }
 

@@ -1,57 +1,101 @@
-import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { defineStore } from 'pinia';
+import { ref, computed } from 'vue';
 
 export const useUserStore = defineStore('user', () => {
-  const isLoggedIn = ref(false)
   const userInfo = ref({
-    name: '',
-    phone: ''
-  })
-  const rememberMe = ref(false)
+    id: '',
+    username: '',
+    token: '',
+  });
 
-  function login(userData, remember = false) {
-    rememberMe.value = remember
-    isLoggedIn.value = true
-    userInfo.value = userData
+  const isLoggedIn = computed(() => !!userInfo.value.token && !!userInfo.value.id);
+  const isRemembered = ref(false);
 
-    const storeData = {
-      userInfo: userData,
-      isLoggedIn: true
+  // 设置记住状态的函数
+  const setRememberStatus = (remember) => {
+    isRemembered.value = remember;
+
+    // 如果已登录，则更新存储位置
+    if (isLoggedIn.value) {
+      // 清除旧存储
+      if (remember) {
+        sessionStorage.removeItem('user');
+      } else {
+        localStorage.removeItem('user');
+      }
+
+      // 保存到新存储
+      const storage = remember ? localStorage : sessionStorage;
+      storage.setItem('user', JSON.stringify({
+        userInfo: userInfo.value,
+        isRemembered: remember
+      }));
     }
+  };
 
-    if (remember) {
-      localStorage.setItem('user', JSON.stringify(storeData))
-    } else {
-      sessionStorage.setItem('user', JSON.stringify(storeData))
-    }
-  }
-
-  function logout() {
-    isLoggedIn.value = false
+  // 设置用户信息
+  const setUserInfo = (user) => {
     userInfo.value = {
-      name: '',
-      phone: ''
-    }
-    rememberMe.value = false
+      id: user.id || '',
+      username: user.username || '',
+      token: user.token || '',
+    };
 
-    // 清除存储
-    localStorage.removeItem('user')
-    sessionStorage.removeItem('user')
-  }
+    // 登录成功后，根据记住状态保存数据
+    const storage = isRemembered.value ? localStorage : sessionStorage;
+    storage.setItem('user', JSON.stringify({
+      userInfo: userInfo.value,
+      isRemembered: isRemembered.value
+    }));
+  };
 
+  // 清除用户信息
+  const clearUserInfo = () => {
+    userInfo.value = {
+      id: '',
+      username: '',
+      token: '',
+    };
+
+    // 清除记住状态
+    isRemembered.value = false;
+
+    // 清除所有存储
+    localStorage.removeItem('user');
+    sessionStorage.removeItem('user');
+  };
+
+  // 初始化函数
   function init() {
-    let userData = localStorage.getItem('user')
-    if (!userData) {
-      userData = sessionStorage.getItem('user')
-    }
+    try {
+      // 先检查localStorage
+      let data = JSON.parse(localStorage.getItem('user') || 'null');
+      if (data && data.userInfo && data.userInfo.token) {
+        userInfo.value = data.userInfo;
+        isRemembered.value = true;
+        return;
+      }
 
-    if (userData) {
-      const data = JSON.parse(userData)
-      userInfo.value = data.userInfo
-      isLoggedIn.value = data.isLoggedIn
-      rememberMe.value = !!(localStorage.getItem('user'))
+      // 再检查sessionStorage
+      data = JSON.parse(sessionStorage.getItem('user') || 'null');
+      if (data && data.userInfo && data.userInfo.token) {
+        userInfo.value = data.userInfo;
+        isRemembered.value = false;
+      }
+    } catch (error) {
+      console.error('加载用户数据失败:', error);
     }
   }
 
-  return { isLoggedIn, userInfo, rememberMe, login, logout, init }
-})
+  // 初始化
+  init();
+
+  return {
+    userInfo,
+    setUserInfo,
+    clearUserInfo,
+    isLoggedIn,
+    setRememberStatus,
+    isRemembered
+  };
+});
