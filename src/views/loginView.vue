@@ -45,11 +45,11 @@
 
         <form @submit.prevent="handleLogin">
           <div class="form-group">
-            <label class="form-label">手机号码</label>
+            <label class="form-label">帐号信息</label>
             <input
               type="tel"
               class="form-input"
-              placeholder="请输入手机号码"
+              placeholder="请输入 手机号码 / 用户名"
               v-model="formData.phoneNumber"
               :class="{ 'error-input': errors.phoneNumber }"
             >
@@ -75,9 +75,14 @@
 
           <div class="login-options">
             <div class="remember-me">
-              <input type="checkbox" id="remember" v-model="formData.remember">
-              <label for="remember">记住我</label>
-            </div>
+  <input
+    type="checkbox"
+    id="remember"
+    v-model="formData.remember"
+    @change="handleRememberChange"
+  >
+  <label for="remember">记住我</label>
+</div>
             <a href="#" class="forgot-password" @click.prevent="forgotPassword">忘记密码？</a>
           </div>
 
@@ -115,15 +120,18 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { ElMessage } from 'element-plus';
 import { loginApi } from '@/api/login';
+import { useUserStore } from '@/stores/userStore';
 
 const router = useRouter();
+const userStore = useUserStore();
 
-// 表单数据
+// 表单数据，初始化记住我状态
 const formData = ref({
   phoneNumber: '',
   password: '',
-  remember: false
+  remember: userStore.isRemembered
 });
+
 
 // 错误信息
 const errors = ref({
@@ -148,16 +156,6 @@ const validateForm = () => {
     errors.value[key] = '';
   }
 
-  // 手机号验证
-  const phoneNumberRegex = /^1[3-9]\d{9}$/;
-  if (!formData.value.phoneNumber) {
-    errors.value.phoneNumber = '请输入手机号码';
-    isValid = false;
-  } else if (!phoneNumberRegex.test(formData.value.phoneNumber)) {
-    errors.value.phoneNumber = '请输入有效的手机号码';
-    isValid = false;
-  }
-
   // 密码验证
   if (!formData.value.password) {
     errors.value.password = '请输入密码';
@@ -175,22 +173,38 @@ const handleLogin = async() => {
 
   try {
     const result = await loginApi(formData.value);
-    console.log('Login result:', result); // 调试用
 
-    // 根据后端返回的结构判断成功条件
     if (result.code === 1 || result.success) {
+      // 先设置记住我状态，这影响后续的持久化行为
+      userStore.setRememberStatus(formData.value.remember);
+      console.log("记住我状态为:", formData.value.remember);
+
+
+      // 设置用户信息 - 这会触发store的持久化逻辑
+      userStore.setUserInfo({
+        id: result.data.id,
+        username: result.data.username,
+        token: result.data.token,
+      });
+
       ElMessage.success('登录成功');
-      // 可能需要保存token等信息
-      router.push('/dashboard'); // 跳转到仪表板
+      router.push('/');
     } else {
-      ElMessage.error(result.msg || '登录失败');
+      ElMessage.error(result.message || '登录失败');
     }
   } catch (error) {
     console.error('Login error:', error);
-    ElMessage.error(error.msg || '登录失败，请检查网络连接');
+    ElMessage.error(error.message || '登录失败，请检查网络连接');
   } finally {
     isSubmitting.value = false;
   }
+};
+
+// 添加到您的方法中
+const handleRememberChange = () => {
+  console.log("记住我状态变更为:", formData.value.remember);
+  // 您可以在这里做一些其他操作，比如立即更新 store 中的状态
+  userStore.setRememberStatus(formData.value.remember);
 };
 
 // 忘记密码

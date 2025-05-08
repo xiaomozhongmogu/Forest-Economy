@@ -150,38 +150,6 @@ export default {
       model: "grok-3-beta",
     };
 
-
-    // 监听路由变化
-    watch(() => route.query, (newQuery) => {
-      if (newQuery.new) {
-        // 新建项目
-        clearChatHistory();
-        conversationId.value = Date.now().toString();
-        conversationTitle.value = '';
-      } else if (newQuery.historyId) {
-        // 加载特定历史
-        const history = historyStore.chatHistory.find(h => h.id === newQuery.historyId);
-        if (history) {
-          loadSpecificHistory(history);
-        }
-      }
-    }, { immediate: true });
-
-    // 初始化时加载历史记录
-    onMounted(() => {
-      // 如果不是新项目或加载特定历史，则加载本地存储的聊天记录
-      if (!route.query.new && !route.query.historyId) {
-        loadChatHistory();
-      }
-
-      // 如果有历史记录，滚动到最新消息
-      if (chatHistory.value.length > 0) {
-        nextTick(() => {
-          scrollToBottom();
-        });
-      }
-    });
-
     // 加载聊天历史
     const loadChatHistory = () => {
       try {
@@ -261,6 +229,40 @@ export default {
         sendSpecificMessage(history.firstMessage);
       }
     };
+
+
+
+    // 监听路由变化
+    watch(() => route.query, (newQuery) => {
+      if (newQuery.new) {
+        // 新建项目
+        clearChatHistory();
+        conversationId.value = Date.now().toString();
+        conversationTitle.value = '';
+      } else if (newQuery.historyId) {
+        // 加载特定历史
+        const history = historyStore.chatHistory.find(h => h.id === newQuery.historyId);
+        if (history) {
+          loadSpecificHistory(history);
+        }
+      }
+    }, { immediate: true });
+
+    // 初始化时加载历史记录
+    onMounted(() => {
+      // 如果不是新项目或加载特定历史，则加载本地存储的聊天记录
+      if (!route.query.new && !route.query.historyId) {
+        loadChatHistory();
+      }
+
+      // 如果有历史记录，滚动到最新消息
+      if (chatHistory.value.length > 0) {
+        nextTick(() => {
+          scrollToBottom();
+        });
+      }
+    });
+
 
     // 发送特定消息（用于加载历史记录）
     const sendSpecificMessage = async (message) => {
