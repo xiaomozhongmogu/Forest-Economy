@@ -71,7 +71,7 @@
           </el-menu-item-group>
         </el-sub-menu>
 
-        <el-menu-item index="/data-management">
+        <el-menu-item index="/data_management">
           <el-icon>
             <Search />
           </el-icon>

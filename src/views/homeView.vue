@@ -47,7 +47,7 @@
         <template #append>
           <el-button
             type="primary"
-            :icon="chatHistory.length > 0 ? 'ArrowUp' : 'Search'"
+            :icon="chatHistory.length > 0 ? ArrowUp : Search"
             @click="sendMessage"
             :disabled="isLoading || userInput.trim() === ''"
           ></el-button>

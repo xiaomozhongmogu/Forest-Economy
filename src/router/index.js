@@ -26,18 +26,23 @@ const router = createRouter({
           path: '/data_dashboard',
           name: 'data_dashboard',
           component: () => import('@/views/DataView.vue')
+        },
+        {
+          path: '/data_management',
+          name: 'data_management',
+          component: () => import('@/views/dataManagementView.vue')
         }
       ]
     },
     {
       path: '/login',
       name: 'login',
-      component: () => import('@/views/LoginView.vue')
+      component: () => import('@/views/loginView.vue')
     },
     {
       path: '/register',
       name: 'register',
-      component: () => import('@/views/RegisterView.vue')
+      component: () => import('@/views/registerView.vue')
     }
   ],
 })
